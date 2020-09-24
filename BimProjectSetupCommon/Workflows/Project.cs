@@ -34,14 +34,17 @@ namespace BimProjectSetupCommon.Workflow
             DataController.InitializeAllProjects();
         }
 
-        public void CreateProjectsProcess()
+        public void CreateProjectsProcess(List<BimProject> projects)
         {
             try
             {
-                CsvReader.ReadDataFromProjectCSV();
+                if (projects == null)
+                {
+                    CsvReader.ReadDataFromProjectCSV();
+                }
                 if (false == _options.TrialRun)
                 {
-                    CreateProjects();
+                    CreateProjects(projects);
                 }
                 else
                 {
@@ -125,36 +128,47 @@ namespace BimProjectSetupCommon.Workflow
             return _serviceTypes;
         }
 
-        private void CreateProjects()
+        private void CreateProjects(List<BimProject> projectsToCreate)
         {
             Log.Info("");
             Log.Info("Creating projects...");
 
-            List<BimProject> _projectsToCreate = DataController.GetBimProjects();
+            List<BimProject> _projectsToCreate;
 
-            if (_projectsToCreate == null || _projectsToCreate.Count < 1)
+            if (projectsToCreate != null)
             {
-                Log.Info("Project creation was unable to start due to insufficient input data");
-                return;
+                _projectsToCreate = projectsToCreate;
+                DataController.AddProject(_projectsToCreate.First());
             }
-
-            for(int i = 0; i < DataController._projectTable.Rows.Count; i++)
+            else
             {
-                string name = Convert.ToString(DataController._projectTable.Rows[i]["name"]);
-                Log.Info($"- processing row {i + 1} - project name: {name}");
+                _projectsToCreate = DataController.GetBimProjects();
 
-                BimProject project = _projectsToCreate.FirstOrDefault(p => p.name != null && p.name.Equals(name));
-                if (project == null || false == CheckRequiredParams(project, DataController._projectTable.Rows[i]))
+                if (_projectsToCreate == null || _projectsToCreate.Count < 1)
                 {
-                    Log.Error($"There's an incomplete input data");
-                    DataController._projectTable.Rows[i]["result"] = ResultCodes.IncompleteInputData;
-                    continue;
+                    Log.Info("Project creation was unable to start due to insufficient input data");
+                    return;
                 }
 
-                DataController.AddProject(project, null, i);
+                for (int i = 0; i < DataController._projectTable.Rows.Count; i++)
+                {
+                    string name = Convert.ToString(DataController._projectTable.Rows[i]["name"]);
+                    Log.Info($"- processing row {i + 1} - project name: {name}");
+
+                    BimProject project = _projectsToCreate.FirstOrDefault(p => p.name != null && p.name.Equals(name));
+                    if (project == null || false == CheckRequiredParams(project, DataController._projectTable.Rows[i]))
+                    {
+                        Log.Error($"There's an incomplete input data");
+                        DataController._projectTable.Rows[i]["result"] = ResultCodes.IncompleteInputData;
+                        continue;
+                    }
+
+                    DataController.AddProject(project, null, i);
+                }
+                CsvExporter.WriteResults(DataController._projectTable, _options, _options.FilePath);
             }
-            CsvExporter.WriteResults(DataController._projectTable, _options, _options.FilePath);
         }
+
         private void UpdateProjects()
         {
             Log.Info("");

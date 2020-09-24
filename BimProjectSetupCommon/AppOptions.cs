@@ -26,6 +26,20 @@ namespace BimProjectSetupCommon
 {
     public class AppOptions : ApplicationOptions
     {
+        public string TemplateProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public string StartDate { get; set; } = "10/1/2020";
+        public string EndDate { get; set; } = "10/1/2022";
+        public string ProjectType { get; set; } = "Office";
+        public string Value { get; set; } = "0";
+        public string Currency { get; set; } = "USD";
+        public string Country { get; set; } = "United States";
+        public string Timezone { get; set; } = "America/New_York";
+        public string Language { get; set; } = "en";
+        public string ConstructionType { get; set; } = "New Construction";
+        public string ContractType { get; set; } = "Design-Bid-Build";
+
+
         public string FilePath { get; set; }
         public string ServiceFilePath { get; set; }
         public string ProjectUserFilePath { get; set; }
@@ -180,6 +194,18 @@ namespace BimProjectSetupCommon
                 {
                     options.AccountRegion = args[i].Remove(0, 2);
                     ++i;
+                }
+                else if (arg.Equals("--ProjectName", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    options.ProjectName = args[++i];
+                }
+                else if (arg.Equals("--TemplateProjectId", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    options.TemplateProjectId = args[++i];
+                }
+                else if (arg.Equals("--ProjectType", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    options.ProjectType = args[++i];
                 }
             }
 

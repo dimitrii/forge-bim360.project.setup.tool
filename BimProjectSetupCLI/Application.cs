@@ -21,6 +21,8 @@ using System;
 using System.Reflection;
 using BimProjectSetupCommon;
 using BimProjectSetupCommon.Workflow;
+using System.Collections.Generic;
+using Autodesk.Forge.BIM360.Serialization;
 
 namespace Autodesk.BimProjectSetup
 {
@@ -61,6 +63,23 @@ namespace Autodesk.BimProjectSetup
         }
         public void Process()
         {
+            if (options.ProjectName != null)
+            {
+                var projects = new List<BimProject>()
+                { 
+                    new BimProject()
+                    {
+                        name = options.ProjectName,
+                        start_date = Convert.ToDateTime(options.StartDate),
+                        end_date = Convert.ToDateTime(options.EndDate),
+                        project_type = options.ProjectType,
+                        value = options.Value,
+                        currency = options.Currency
+                    }
+                };
+                projectProcess.CreateProjectsProcess(projects);
+            }
+
             if (options.FilePath != null)
             {
                 if (options.CopyFolders)
@@ -69,7 +88,7 @@ namespace Autodesk.BimProjectSetup
                 }
                 else
                 {
-                    projectProcess.CreateProjectsProcess();
+                    projectProcess.CreateProjectsProcess(null);
                 }
             }
             if (options.ServiceFilePath != null)
